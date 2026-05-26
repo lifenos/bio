@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lifenos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Базовые настройки стиля */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Georgia', serif; /* Шрифт под старину/готику, как на скрине */
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Фоновое изображение с затемнением */
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Замени URL ниже на свою картинку, если захочешь */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.85)), 
+                        url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1920') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        /* Холст для падающего снега */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Главный контейнер по центру */
+        .main-container {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        /* Никнейм */
+        .nickname {
+            font-size: 3.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Статус / Цитата */
+        .status {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 0.95rem;
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        /* Виджет профиля (как на скрине по центру) */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-info {
+            text-align: left;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .profile-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .profile-status {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* Ряд с иконками соцсетей */
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .icon-link {
+            color: #fff;
+            font-size: 1.6rem;
+            text-decoration: none;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        /* Эффект при наведении на иконку */
+        .icon-link:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-overlay"></div>
+
+    <canvas id="snow"></canvas>
+
+    <div class="main-container">
+        
+        <h1 class="nickname">lifenos</h1>
+        
+        <p class="status">Даже в бездне космоса человек ищет свой путь.<br>И находит.</p>
+        
+        <div class="profile-card">
+            <img class="avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=lifenos" alt="Avatar">
+            <div class="profile-info">
+                <div class="profile-name">2kaaa_ <span style="font-size: 10px; color: #a855f7;">💀 odd</span></div>
+                <div class="profile-status">last seen 15 hours ago</div>
+            </div>
+        </div>
+        
+        <div class="social-icons">
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-telegram"></i></a>
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-discord"></i></a>
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-github"></i></a>
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-twitch"></i></a>
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-spotify"></i></a>
+            <a href="#" target="_blank" class="icon-link"><i class="fa-brands fa-steam"></i></a>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('snow');
+        const ctx = canvas.getContext('2document' !== typeof document ? null : '2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const numFlakes = 70;
+        const flakes = [];
+
+        for (let i = 0; i < numFlakes; i++) {
+            flakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 2 + 1, // размер снежинки
+                d: Math.random() * numFlakes, // плотность падения
+                speed: Math.random() * 1 + 0.5
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.beginPath();
+            for (let i = 0; i < numFlakes; i++) {
+                const f = flakes[i];
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+            }
+            ctx.fill();
+            move();
+        }
+
+        function move() {
+            for (let i = 0; i < numFlakes; i++) {
+                const f = flakes[i];
+                f.y += f.speed;
+                f.x += Math.sin(f.y / 30) * 0.5; // легкое покачивание ветра
+
+                // Если снежинка упала — возвращаем её наверх
+                if (f.y > canvas.height) {
+                    flakes[i] = { x: Math.random() * canvas.width, y: -10, r: f.r, d: f.d, speed: f.speed };
+                }
+            }
+        }
+
+        setInterval(draw, 25);
+    </script>
+</body>
+</html>
